@@ -1,0 +1,72 @@
+﻿@model List<RestServer.Models.Solicitacao>
+@if (HttpContext.Current.User.Identity.IsAuthenticated)
+{
+    <nav class="navbar navbar-inverse">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="#"> Alvo </a>
+        </div>
+        <ul class="nav navbar-nav">
+            <li class="text-capitalize">@Html.ActionLink("Alterar Dados pessoais","Alterar", "Usuario", new { id = Session["idUsuario"] }, null)</li>
+            <li class="text-capitalize">@Html.ActionLink("Alterar Senha", "AlterarSenha", "Usuario", new { id = Session["idUsuario"] }, null)</li>
+            <li>@Html.ActionLink("Sair", "Logoff", "Home")</li>
+        </ul>
+    </nav>
+}
+
+@{
+    ViewBag.Title = "Consultas";
+}
+<div class="container">
+
+    <h2>Consultas</h2>
+    <br />
+
+    <p>@Html.ActionLink("Incluir Consultas", "Incluir", "Consultas", new { @class = "btn btn-info" })</p>
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Controle</th>
+                    <th>Descrição consulta</th>
+                    <th>Data da Consulta</th>
+                    <th>Data de conclusão da consulta</th>
+                    <th>Status</th>
+                    <th>Erros</th>
+                </tr>
+            </thead>
+            @foreach (var solicitacao in Model)
+            {
+                <tbody>
+                    <tr class="active">
+                        <td>@solicitacao.Id</td>
+                        <td>@solicitacao.Descricao</td>
+                        <td>@solicitacao.DataSolicitacao </td>
+                        <td>@solicitacao.DataConclusaoSolicitacao </td>
+
+                        @if (solicitacao.status == RestServer.Models.StatusSolicitacao.Download)
+                        {
+                            <td>@Html.ActionLink("Download", "ResultadoCSV", new { idSolicitacao = solicitacao.Id }, new { @class = "btn btn-success" })</td>
+                
+                            if (solicitacao.ErrosSolicitacao)
+                            {
+                            <td>@Html.ActionLink("Erros", "ErrosCSV", new { idSolicitacao = solicitacao.Id }, new { @class = "btn btn-danger" })</td>
+                            }
+                            else
+                            {
+                            <td></td>
+                            }
+                        }
+                        else
+                        {
+                            <td>@solicitacao.status</td>
+                            <td></td>
+                        }
+
+                    </tr>
+                </tbody>  
+            }
+
+        </table>
+    </div>
+</div>
+

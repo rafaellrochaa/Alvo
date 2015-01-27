@@ -1,0 +1,31 @@
+﻿@model RestServer.Models.Usuario
+@{
+    ViewBag.Title = "Cadastro";
+}
+
+<nav class="navbar navbar-inverse">
+    <ul class="nav navbar-nav">
+        <li class="nav navbar-brand">Cadastro</li>
+    </ul>
+</nav>
+
+<body>
+    <div class="container">
+
+        <form method="post">
+            <p class="text-danger">@ViewBag.MensagemErro</p>
+            <label for="Nome">Nome</label><br />
+            <input type="text" class="form-control" name="Nome" id="Nome" value="@Model.Nome" required/><br />
+            <label for="Senha">Senha</label><br />
+            <input type="password" class="form-control" name="Senha" id="Senha" value="" required /><br />
+            <label for="Confirmar senha">Confirmar senha</label><br />
+            <input type="password" class="form-control" name="ConfirmarSenha" id="ConfirmarSenha" required /><br />
+            <label for="Email">Email</label><br />
+            <input type="Email" class="form-control" name="Email" id="Email" value="@Model.Email" required/>
+            <br />
+            <br />
+            <input type="submit" class="btn btn-success" value="Criar" />
+            @Html.ActionLink("Cancelar", "Index", "Consultas", null, new { @class = "btn btn-danger" })
+        </form>
+    </div>
+</body>
