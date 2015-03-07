@@ -115,13 +115,6 @@ namespace RestServer.Controllers
                 //Verificar se o número de beneficios é maior que o saldo;
                 if (matriculas.Count <= saldo)
                 {
-                    idSolicitacaoGerada = db.InserirSolicitacao(idUsuario, Descricao); //Pego o código da última solicitação inserida por este usuário.
-
-                    if (!(saldo == 500000))
-                    {
-                        db.InserirExtrato(idUsuario, idSolicitacaoGerada, matriculas.Count);
-                    }
-
                     List<string> LoteConsulta = new List<string>();
                     int cont = 0;
                     int i = 0;
@@ -138,20 +131,28 @@ namespace RestServer.Controllers
 
                         // Solicitacao de consulta no servidor e gravação de resultado no banco de dados
                         Parser metodos = new Parser();
-                        Consulta consulta = new Consulta();
+                        Consulta consultaRV, consultaTitular, consultaConbas = new Consulta();
 
                         //Lote RV
-                        consulta = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.rv));
-                        db.InserirConsulta(consulta, idSolicitacaoGerada);
+                        consultaRV = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.rv));
 
                         //Lote Titular
-                        consulta = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.titular));
-                        db.InserirConsulta(consulta, idSolicitacaoGerada);
+                        consultaTitular = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.titular));
 
                         //Lote Conbas
-                        consulta = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.conbas));
-                        db.InserirConsulta(consulta, idSolicitacaoGerada);
+                        consultaConbas = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.conbas));
 
+                        idSolicitacaoGerada = db.InserirSolicitacao(idUsuario, Descricao); //Pego o código da última solicitação inserida por este usuário.
+
+                        if (!(saldo == 500000))
+                        {
+                            db.InserirExtrato(idUsuario, idSolicitacaoGerada, matriculas.Count);
+                        }
+
+                        db.InserirConsulta(consultaRV, idSolicitacaoGerada);
+                        db.InserirConsulta(consultaTitular, idSolicitacaoGerada);
+                        db.InserirConsulta(consultaConbas, idSolicitacaoGerada);
+                        //VErificacao
                         i = 0;
                         LoteConsulta.Clear();
                     }
