@@ -21,7 +21,7 @@ namespace RestServer.Controllers
 
             ConexaoDb2 db = new ConexaoDb2();
             solicitacoes = db.ConsultarSolicitacoes(Convert.ToInt16(Session["idUsuario"]));
-            
+
             return View(solicitacoes);
         }
 
@@ -104,10 +104,10 @@ namespace RestServer.Controllers
 
             ConexaoDb2 db = new ConexaoDb2();
             ManipulaCsv arquivoMatriculas = new ManipulaCsv();
-            
+
             //Verificar SALDO, se tiver 2 consultas libera leitura de matrículas e guarda em uma varialvel valor do saldo
-            int saldo= db.VerificarSaldo(idUsuario);
-            
+            int saldo = db.VerificarSaldo(idUsuario);
+
             if (saldo >= 2)
             {
                 List<string> matriculas = arquivoMatriculas.LerCsv(nomeArquivo);
@@ -116,10 +116,10 @@ namespace RestServer.Controllers
                 if (matriculas.Count <= saldo)
                 {
                     idSolicitacaoGerada = db.InserirSolicitacao(idUsuario, Descricao); //Pego o código da última solicitação inserida por este usuário.
-                    
+
                     if (!(saldo == 500000))
                     {
-                        db.InserirExtrato(idUsuario, idSolicitacaoGerada,matriculas.Count);
+                        db.InserirExtrato(idUsuario, idSolicitacaoGerada, matriculas.Count);
                     }
 
                     List<string> LoteConsulta = new List<string>();
@@ -156,7 +156,7 @@ namespace RestServer.Controllers
                         LoteConsulta.Clear();
                     }
                 }
-                
+
                 else
                 {
                     throw new Exception("Você tem " + saldo + " consultas disponíveis. Reduza o número de benefícios para que a consulta seja realizada");

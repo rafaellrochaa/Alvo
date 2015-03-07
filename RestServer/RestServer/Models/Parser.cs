@@ -96,34 +96,51 @@ namespace RestServer.Models
 
         public Consulta InterpretarJsonPedidoConsulta(MemoryStream retornoPost)
         {
+            JsonRetornoConsulta respostaJsonConsulta;
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(JsonRetornoConsulta)); // Para serializar precisa de um objeto com os campos idênticos aos campos de retorno;
-            JsonRetornoConsulta respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost); // Após criar o objeto serializado com o tipo, basta ler com o ReadObject;
-            Consulta consulta = new Consulta();
+            string LoteConsulta = ConverterStreamMemoriaTexto(retornoPost).Substring(100);
+            
+            //Verificando se houve erro retornado do servidor de consulta, pois se tentar serializar antes pra verificar depois a referência é perdida;
+            if (LoteConsulta.Contains("data_processo"))
+            {
+                respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost); // Após criar o objeto serializado com o tipo, basta ler com o ReadObject;
+            }
+            else
+            {
+                throw new Exception("Erro no servidor de consultas DATAPREV: " + LoteConsulta);
+            }
 
-            consulta.Chave = respostaJsonConsulta.id;
-            consulta.DataConsulta = Convert.ToDateTime(respostaJsonConsulta.data_registro);
-            consulta.Status = Convert.ToInt16(respostaJsonConsulta.status);
-            consulta.StatusProcesso = (TipoProcesso)Convert.ToInt16(respostaJsonConsulta.status_processo);
-            consulta.DataProcessado = Convert.ToDateTime(respostaJsonConsulta.data_processo);
-            consulta.tipoConsultaRealizada = (Contexto)Enum.Parse(typeof(Contexto), respostaJsonConsulta.contexto);
-
-            return consulta;
+            return 
+                new Consulta(){
+                    Chave= respostaJsonConsulta.id,
+                    DataConsulta= Convert.ToDateTime(respostaJsonConsulta.data_registro),
+                    Status= Convert.ToInt16(respostaJsonConsulta.status),
+                    StatusProcesso= (TipoProcesso)Convert.ToInt16(respostaJsonConsulta.status_processo),
+                    DataProcessado= Convert.ToDateTime(respostaJsonConsulta.data_processo),
+                    tipoConsultaRealizada= (Contexto)Enum.Parse(typeof(Contexto),respostaJsonConsulta.contexto)};
         }
 
         public Consulta InterpretarJsonPedidoConsulta(MemoryStream retornoPost, int idConsulta)
         {
-            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(JsonRetornoConsulta));
-            JsonRetornoConsulta respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost);
-
             Consulta consulta = new Consulta();
 
-            consulta.Id = idConsulta;
-            consulta.Chave = respostaJsonConsulta.id;
-            consulta.DataConsulta = Convert.ToDateTime(respostaJsonConsulta.data_registro);
-            consulta.Status = Convert.ToInt16(respostaJsonConsulta.status);
-            consulta.StatusProcesso = (TipoProcesso)Convert.ToInt16(respostaJsonConsulta.status_processo);
-            consulta.DataProcessado = Convert.ToDateTime(respostaJsonConsulta.data_processo);
-            consulta.tipoConsultaRealizada = (Contexto)Enum.Parse(typeof(Contexto), respostaJsonConsulta.contexto);
+            if (ConverterStreamMemoriaTexto(retornoPost).Contains("id"))
+            {
+                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(JsonRetornoConsulta));
+                JsonRetornoConsulta respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost);
+                consulta.Id = idConsulta;
+                consulta.Chave = respostaJsonConsulta.id;
+                consulta.DataConsulta = Convert.ToDateTime(respostaJsonConsulta.data_registro);
+                consulta.Status = Convert.ToInt16(respostaJsonConsulta.status);
+                consulta.StatusProcesso = (TipoProcesso)Convert.ToInt16(respostaJsonConsulta.status_processo);
+                consulta.DataProcessado = Convert.ToDateTime(respostaJsonConsulta.data_processo);
+                consulta.tipoConsultaRealizada = (Contexto)Enum.Parse(typeof(Contexto), respostaJsonConsulta.contexto);
+            }
+
+            else
+            {
+                throw new Exception("Erro no servidor de consultas DATAPREV: " + ConverterStreamMemoriaTexto(retornoPost));
+            }
 
             return consulta;
         }
@@ -326,7 +343,7 @@ namespace RestServer.Models
                 //Renomeando o arquivo gerado
                 System.IO.File.Move(ArquivoTempGerado, Path.Combine(Path.GetTempPath(), nomeArquivo));
             }
-            
+
             return ArquivoDownload;
         }
 
@@ -498,7 +515,7 @@ namespace RestServer.Models
                         ArquivoTemp.Write(linha.ToString());
                     }
 
-                    catch(Exception)
+                    catch (Exception)
                     {
                         throw new Exception("Erro ao gerar o arquivo (Fluxo de resultados congestionado). Entre em contato com o administrador do site.");
                     }
@@ -549,7 +566,7 @@ namespace RestServer.Models
                     ExtratoTitular titular;
                     ExtratoRV rv;
                     ExtratoConbas conbas;
-                    
+
                     titular = ProcessarResultadoTitular(DescompactarResultado(ResultadosSolicitacao["resultado"].ToString()));
                     ResultadosSolicitacao.Read();
 
@@ -559,7 +576,7 @@ namespace RestServer.Models
 
                     conbas = ProcessarResultadoConbas(DescompactarResultado(ResultadosSolicitacao["resultado"].ToString()));
                     ExtratoBeneficio eb = new ExtratoBeneficio() { nb = titular.Matricula, Titular = titular, Rv = rv, Conbas = conbas };
-                   
+
                     string elemento = ToXML<ExtratoBeneficio>(eb);
                     ArquivoTemp.WriteLine("<Beneficio>");
                     ArquivoTemp.Write(elemento.Substring(162, elemento.Length - 181));
