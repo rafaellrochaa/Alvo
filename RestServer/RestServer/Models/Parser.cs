@@ -96,12 +96,18 @@ namespace RestServer.Models
 
         public Consulta InterpretarJsonPedidoConsulta(MemoryStream retornoPost)
         {
+            //Cópia do retorno da consulta, para avaliação de possíveis erros;
+            MemoryStream copiaRetornoPost = new MemoryStream();
+            retornoPost.CopyTo(copiaRetornoPost);
+            retornoPost.Position = 0;
+            copiaRetornoPost.Position = 0;
+
             JsonRetornoConsulta respostaJsonConsulta;
             DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(JsonRetornoConsulta)); // Para serializar precisa de um objeto com os campos idênticos aos campos de retorno;
-            string LoteConsulta = ConverterStreamMemoriaTexto(retornoPost).Substring(100);
+            string LoteConsulta = ConverterStreamMemoriaTexto(copiaRetornoPost).Substring(0, 10);
             
             //Verificando se houve erro retornado do servidor de consulta, pois se tentar serializar antes pra verificar depois a referência é perdida;
-            if (LoteConsulta.Contains("data_processo"))
+            if (LoteConsulta.Contains(@"{""id"":"""))
             {
                 respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost); // Após criar o objeto serializado com o tipo, basta ler com o ReadObject;
             }
@@ -109,7 +115,6 @@ namespace RestServer.Models
             {
                 throw new Exception("Erro no servidor de consultas DATAPREV: " + LoteConsulta);
             }
-
             return 
                 new Consulta(){
                     Chave= respostaJsonConsulta.id,
@@ -122,27 +127,36 @@ namespace RestServer.Models
 
         public Consulta InterpretarJsonPedidoConsulta(MemoryStream retornoPost, int idConsulta)
         {
-            Consulta consulta = new Consulta();
+            //Cópia do retorno da consulta, para avaliação de possíveis erros;
+            MemoryStream copiaRetornoPost = new MemoryStream();
+            retornoPost.CopyTo(copiaRetornoPost);
+            retornoPost.Position = 0;
+            copiaRetornoPost.Position = 0;
 
-            if (ConverterStreamMemoriaTexto(retornoPost).Contains("id"))
+            JsonRetornoConsulta respostaJsonConsulta;
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(JsonRetornoConsulta)); // Para serializar precisa de um objeto com os campos idênticos aos campos de retorno;
+            string LoteConsulta = ConverterStreamMemoriaTexto(copiaRetornoPost).Substring(0, 10);
+
+            //Verificando se houve erro retornado do servidor de consulta, pois se tentar serializar antes pra verificar depois a referência é perdida;
+            if (LoteConsulta.Contains(@"{""id"":"""))
             {
-                DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(JsonRetornoConsulta));
-                JsonRetornoConsulta respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost);
-                consulta.Id = idConsulta;
-                consulta.Chave = respostaJsonConsulta.id;
-                consulta.DataConsulta = Convert.ToDateTime(respostaJsonConsulta.data_registro);
-                consulta.Status = Convert.ToInt16(respostaJsonConsulta.status);
-                consulta.StatusProcesso = (TipoProcesso)Convert.ToInt16(respostaJsonConsulta.status_processo);
-                consulta.DataProcessado = Convert.ToDateTime(respostaJsonConsulta.data_processo);
-                consulta.tipoConsultaRealizada = (Contexto)Enum.Parse(typeof(Contexto), respostaJsonConsulta.contexto);
+                respostaJsonConsulta = (JsonRetornoConsulta)ser.ReadObject(retornoPost); // Após criar o objeto serializado com o tipo, basta ler com o ReadObject;
             }
-
             else
             {
-                throw new Exception("Erro no servidor de consultas DATAPREV: " + ConverterStreamMemoriaTexto(retornoPost));
+                throw new Exception("Erro no servidor de consultas DATAPREV: " + LoteConsulta);
             }
-
-            return consulta;
+            return
+                new Consulta()
+                {
+                    Id= idConsulta,
+                    Chave = respostaJsonConsulta.id,
+                    DataConsulta = Convert.ToDateTime(respostaJsonConsulta.data_registro),
+                    Status = Convert.ToInt16(respostaJsonConsulta.status),
+                    StatusProcesso = (TipoProcesso)Convert.ToInt16(respostaJsonConsulta.status_processo),
+                    DataProcessado = Convert.ToDateTime(respostaJsonConsulta.data_processo),
+                    tipoConsultaRealizada = (Contexto)Enum.Parse(typeof(Contexto), respostaJsonConsulta.contexto)
+                };
         }
 
         public static T deseralization<T>(MemoryStream ms)
