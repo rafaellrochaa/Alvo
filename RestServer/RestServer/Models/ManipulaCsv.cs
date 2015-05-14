@@ -33,7 +33,7 @@ namespace RestServer.Models
             {
                 throw new Exception("A consulta não pôde ser realizada. O arquivo deve conter no mínimo 2 benefícios e no máximo 100 mil.");
             }
-
+            lerMatriculas.Close();
             return matriculas;
         }
 

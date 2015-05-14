@@ -14,7 +14,8 @@ namespace RestServer.Controllers
         [AllowAnonymous]
         public string Index()
         {
-            string[] arquivos = Directory.GetFiles(System.IO.Path.GetTempPath(), "*.csv", SearchOption.TopDirectoryOnly);
+            string diretorioParaLimpezaArquivos = @"e:\home\agilus\Temp\";
+            string[] arquivos = Directory.GetFiles(diretorioParaLimpezaArquivos, "*.csv", SearchOption.TopDirectoryOnly);
             string mensagem = "OK";
 
             foreach (string arquivo in arquivos)

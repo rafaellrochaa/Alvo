@@ -14,7 +14,6 @@ namespace RestServer.Controllers
     {
         //
         // GET: /Consultas/
-
         public ActionResult Index()
         {
             List<Solicitacao> solicitacoes = new List<Solicitacao>();
@@ -64,7 +63,7 @@ namespace RestServer.Controllers
             Parser parse = new Parser();
             string ArquivoTemp = String.Empty;
 
-            string nomeArquivo = System.IO.Path.GetTempPath() + "ConsultaXml_U" + Session["idUsuario"] + "_S" + idSolicitacao.ToString() + ".xml";
+            string nomeArquivo = @"e:\home\agilus\Temp\" + "ConsultaXml_U" + Session["idUsuario"] + "_S" + idSolicitacao.ToString() + ".xml";
 
             if (!System.IO.File.Exists(nomeArquivo))
             {
@@ -99,7 +98,8 @@ namespace RestServer.Controllers
 
             idUsuario = (int)Session["idUsuario"];
 
-            nomeArquivo = Path.GetTempFileName();
+            //nomeArquivo = Path.GetTempFileName();
+            nomeArquivo = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
             arquivoUpload.arquivo.SaveAs(nomeArquivo);
 
             ConexaoDb2 db = new ConexaoDb2();
@@ -168,7 +168,7 @@ namespace RestServer.Controllers
             {
                 throw new Exception("Você tem menos de 2 consultas disponíveis. Para realizar as consultas em lote você precisa ter pelo menos 2 consultas.");
             }
-
+            System.IO.File.Delete(nomeArquivo);
             return RedirectToAction("Index", "Consultas", null);
         }
 

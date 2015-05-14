@@ -347,7 +347,7 @@ namespace RestServer.Models
 
         public static string CriarArquivoCSVDisco(int idSolicitacao, string nomeArquivo)
         {
-            string ArquivoDownload = Path.Combine(Path.GetTempPath(), nomeArquivo);
+            string ArquivoDownload = Path.Combine(@"e:\home\agilus\Temp\", nomeArquivo);
 
             //Se o arquivo não existir, ele é criado
             if (!System.IO.File.Exists(ArquivoDownload))
@@ -355,7 +355,7 @@ namespace RestServer.Models
                 string ArquivoTempGerado = new ConexaoDb2().RecuperarResultado(idSolicitacao, TipoRetorno.csv);
 
                 //Renomeando o arquivo gerado
-                System.IO.File.Move(ArquivoTempGerado, Path.Combine(Path.GetTempPath(), nomeArquivo));
+                System.IO.File.Move(ArquivoTempGerado, ArquivoDownload);
             }
 
             return ArquivoDownload;
@@ -482,7 +482,8 @@ namespace RestServer.Models
 
         public string GerarCsvResultado(NpgsqlDataReader ResultadosSolicitacao)
         {
-            string caminho = Path.GetTempFileName();
+            //string caminho = Path.GetTempFileName();
+            string caminho = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
             StreamWriter ArquivoTemp = new StreamWriter(caminho, true);
             ArquivoTemp.WriteLine(new String(' ', 2000));
             int maxRubricas = 0;
@@ -561,7 +562,8 @@ namespace RestServer.Models
 
         public string GeraXmlResultado(NpgsqlDataReader ResultadosSolicitacao)
         {
-            string caminho = Path.GetTempFileName();
+            //string caminho = Path.GetTempFileName();
+            string caminho = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
             bool aindaHaDados = true;
             StreamWriter ArquivoTemp = new StreamWriter(caminho, true);
 
