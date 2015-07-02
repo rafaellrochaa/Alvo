@@ -13,6 +13,7 @@ namespace RestServer.Models
 
     public static class Servidor
     {
+        //Token
         private static string token = "15a3e82367657a52b7aa1108dcbcc164";// Chave estática
 
         private static MemoryStream RealizarPost(string restdata)
