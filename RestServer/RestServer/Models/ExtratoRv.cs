@@ -30,7 +30,7 @@ namespace RestServer.Models
             double valoresPreCalculo =
             (from rg in regras
              join rb in Rubricas
-             on rg.Descricao equals rb.Nome
+             on SoLetras(rg.Descricao) equals SoLetras(rb.Nome)
              where rg.PreCalculo == true
              select Convert.ToDouble(rb.Sinal + "1" ) * rb.Valor).Sum();
 
@@ -45,11 +45,25 @@ namespace RestServer.Models
             double valoresPosCalculo =
             (from rg in regras
             join rb in Rubricas
-            on rg.Descricao equals rb.Nome
+            on SoLetras(rg.Descricao) equals SoLetras(rb.Nome)
             where rg.PosCalculo == true
             select Convert.ToDouble(rb.Sinal + "1") * rb.Valor).Sum();
 
             Margem = valoresPreCalculo * (cartao ? 0.2 : 0.3) + valoresPosCalculo;
+        }
+
+        string SoLetras(string Palavra)
+        {
+            string letras = String.Empty;
+
+            for (int l = 0; l < Palavra.Length; l++)
+            {
+                if (Char.ToLower(Palavra[l]) >= 97 && Char.ToLower(Palavra[l]) < 123)
+                {
+                    letras += Palavra[l];
+                }
+            }
+            return letras;
         }
     }
 
