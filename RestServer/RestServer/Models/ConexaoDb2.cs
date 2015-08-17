@@ -529,7 +529,7 @@ namespace RestServer.Models
 
                 string validaRetorno = cmd.ExecuteScalar().ToString();
 
-                if (string.IsNullOrEmpty(validaRetorno))
+                if ( string.IsNullOrEmpty(validaRetorno) || validaRetorno.Equals("500000"))
                 {
                     throw new Exception("O período de validade para efetuar consultas expirou.");
                 }
