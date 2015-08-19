@@ -98,7 +98,7 @@ namespace RestServer.Controllers
 
             idUsuario = (int)Session["idUsuario"];
 
-            nomeArquivo = @"e:\home\agilus\Temp\" + Path.GetTempFileName() + Path.GetRandomFileName().Replace(".", "");
+            nomeArquivo = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
             arquivoUpload.arquivo.SaveAs(nomeArquivo);
 
             ConexaoDb2 db = new ConexaoDb2();

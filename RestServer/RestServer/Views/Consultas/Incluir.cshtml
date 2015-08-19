@@ -12,7 +12,7 @@
     <div class="alert alert-warning" role="alert">Selecione o arquivo com as matrículas para realizar a consulta. O arquivo deve conter no mínimo 2 matrículas e no máximo 100 mil, caso contrário a consulta não será realizada.</div>
     <br />
     <div class="container">
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" onsubmit="DesabilitarEnvio()">
             <label>Descrição consulta:</label>
             <input type="text" id="Descricao" name="Descricao" size="33" maxlength="100" /><br />
             <br />
@@ -22,13 +22,17 @@
             <div class="text-danger text-left" id="MensagemAguardar"> 
                 <script type="text/javascript">
                     function MensagemUsuario(){
-                                                document.getElementById("MensagemAguardar").innerHTML = "Aguarde o envio do arquivo. Ao finalizar o envio a página será redirecionada.";
-                                               }
+                        document.getElementById("MensagemAguardar").innerHTML = "Aguarde o envio do arquivo. Ao finalizar o envio a página será redirecionada.";
+                    }
+
+                    function DesabilitarEnvio() {
+                        document.getElementById('botaoEnviar').disabled = true;
+                    }
                 </script>
             </div>
 
             <br />
-            <input type="submit" class="btn btn-success" value="Enviar" onclick="MensagemUsuario()" />
+            <input id="botaoEnviar" type="submit" class="btn btn-success" value="Enviar" onclick="MensagemUsuario();" />
             @Html.ActionLink("Cancelar", "Index", "Consultas", null, new { @class = "btn btn-danger" })
         </form>
         </div>

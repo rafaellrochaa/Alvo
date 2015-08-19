@@ -335,8 +335,7 @@ namespace RestServer.Models
 
         public static string CriarArquivoCSVDisco(int idSolicitacao, string nomeArquivo)
         {
-            string ArquivoDownload = Path.Combine(@"C:\Agilus\Temp", nomeArquivo);
-                //Path.Combine(@"e:\home\agilus\Temp\", nomeArquivo);
+            string ArquivoDownload = Path.Combine(@"e:\home\agilus\Temp\", nomeArquivo);
 
             //Se o arquivo não existir, ele é criado
             if (!System.IO.File.Exists(ArquivoDownload))
