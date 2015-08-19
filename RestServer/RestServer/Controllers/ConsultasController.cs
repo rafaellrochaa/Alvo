@@ -94,12 +94,11 @@ namespace RestServer.Controllers
         public ActionResult Incluir(ArquivoUpload arquivoUpload, string Descricao)
         {
             string nomeArquivo;
-            int idSolicitacaoGerada, idUsuario;
+            int idSolicitacaoGerada = -1, idUsuario;
 
             idUsuario = (int)Session["idUsuario"];
 
-            //nomeArquivo = Path.GetTempFileName();
-            nomeArquivo = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
+            nomeArquivo = @"e:\home\agilus\Temp\" + Path.GetTempFileName() + Path.GetRandomFileName().Replace(".", "");
             arquivoUpload.arquivo.SaveAs(nomeArquivo);
 
             ConexaoDb2 db = new ConexaoDb2();
@@ -142,7 +141,11 @@ namespace RestServer.Controllers
                         //Lote Conbas
                         consultaConbas = metodos.InterpretarJsonPedidoConsulta(Servidor.RealizarPedido(LoteConsulta, Contexto.conbas));
 
-                        idSolicitacaoGerada = db.InserirSolicitacao(idUsuario, Descricao); //Pego o código da última solicitação inserida por este usuário.
+                        if (idSolicitacaoGerada == -1)
+                        {
+                            idSolicitacaoGerada = db.InserirSolicitacao(idUsuario, Descricao); //Pego o código da última solicitação inserida por este usuário.
+                            
+                        }
 
                         if (!(saldo == 500000))
                         {

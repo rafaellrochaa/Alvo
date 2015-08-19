@@ -125,7 +125,6 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Models\ArquivoUpload.cs" />
-    <Compile Include="Models\ConexaoDb.cs" />
     <Compile Include="Models\ConexaoDb2.cs" />
     <Compile Include="Models\Consulta.cs" />
     <Compile Include="Models\Email.cs" />

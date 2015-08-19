@@ -20,15 +20,6 @@ namespace RestServer.Models
         public string connectionString = String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};", serverName, port, userName, password, databaseName);
         public NpgsqlConnection conexao;
 
-        ////Teste
-        //static string serverName = "localhost";
-        //static string port = "5432";
-        //static string userName = "postgres";
-        //static string password = "ac@78902";
-        //static string databaseName = "agilus13";
-        //public string connectionString = String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};", serverName, port, userName, password, databaseName);
-        //public NpgsqlConnection conexao;
-
 
         public int VerificarAcessoUsuario(string usuario, string Senha, string ip)
         {
@@ -227,19 +218,19 @@ namespace RestServer.Models
             {
                 string ObterConsultas = @"create temporary table lista_consulta as
                                         select id, chave, data_consulta, id_status_processo, data_processado, id_tipo_consulta
-                                        from consulta where id_solicitacao=@id and id_status_processo < 3 and atualizando_status='0'
+                                        from consulta where id_solicitacao= @id and id_status_processo < 3 and atualizando_status='0'
                                         order by id;
 
-                                        update consulta 
+                                        update consulta as c
                                         set atualizando_status = '1'
-                                        from consulta c
-                                        join lista_consulta lc on c.id = lc.id;
+                                        from lista_consulta lc
+                                        where c.id = lc.id;
 
                                         select *
-                                        from lista_consulta";
+                                        from lista_consulta;";
 
                 NpgsqlCommand cmd = new NpgsqlCommand(ObterConsultas, conexao);
-                cmd.Parameters.AddWithValue("@Id", idSolicitacao);
+                cmd.Parameters.AddWithValue("@id", idSolicitacao);
 
                 conexao.Open();
 
@@ -302,7 +293,7 @@ namespace RestServer.Models
         {
             using (NpgsqlConnection conexao = new NpgsqlConnection(this.connectionString))
             {
-                string alterarConsultaDb = "update consulta set id_status_processo= @StatusProcesso, data_processado=@DataProcessado, atualizando_status='0' where chave=@Chave";
+                string alterarConsultaDb = "update consulta set id_status_processo= @StatusProcesso, data_processado=@DataProcessado, atualizando_status='0' where chave=@Chave;";
                 NpgsqlCommand cmd = new NpgsqlCommand(alterarConsultaDb, conexao);
                 cmd.Parameters.AddWithValue("@StatusProcesso", Convert.ToInt16(consultaAtualizada.StatusProcesso));
                 cmd.Parameters.AddWithValue("@DataProcessado", consultaAtualizada.DataProcessado);
@@ -319,7 +310,7 @@ namespace RestServer.Models
             //Trazer descrição da tabela status processo
             using (NpgsqlConnection conexao = new NpgsqlConnection(this.connectionString))
             {
-                string consultaBd = "select sp.descricao status_processo from consulta c join status_processo sp on c.id_status_processo = sp.id  where c.id = @idConsulta";
+                string consultaBd = "select sp.descricao as status_processo from consulta c join status_processo sp on c.id_status_processo = sp.id  where c.id = @idConsulta;";
                 NpgsqlCommand cmd = new NpgsqlCommand(consultaBd, conexao);
                 cmd.Parameters.AddWithValue("@idConsulta", idConsulta);
                 conexao.Open();
@@ -465,7 +456,7 @@ namespace RestServer.Models
 
             using (NpgsqlConnection conexao = new NpgsqlConnection(this.connectionString))
             {
-                string consultarDadosResultadoDb = @"select distinct c.id_tipo_consulta as tipo_consulta, r.nb,r.resultado from resultado r join consulta c on id_consulta = c.id where c.id_solicitacao = @id_solicitacao and contem_erro <> '1' order by nb,tipo_consulta";
+                string consultarDadosResultadoDb = @"select distinct c.id_tipo_consulta as tipo_consulta, r.nb,r.resultado from resultado r join consulta c on id_consulta = c.id where c.id_solicitacao = @id_solicitacao and contem_erro <> '1' order by nb,tipo_consulta;";
                 NpgsqlCommand cmd = new NpgsqlCommand(consultarDadosResultadoDb, conexao);
                 cmd.Parameters.AddWithValue("@id_solicitacao", idSolicitacao);
                 cmd.CommandTimeout = 0;
@@ -661,7 +652,6 @@ namespace RestServer.Models
             return ContemErros;
         }
 
-
         public bool ExisteSolicitacaoPendente()
         {
             bool pendente = false;
@@ -681,7 +671,6 @@ namespace RestServer.Models
             }
             return pendente;
         }
-
 
         public DataSet RecuperarErro(int idSolicitacao)
         {
@@ -706,7 +695,15 @@ namespace RestServer.Models
 
             using (NpgsqlConnection conexao = new NpgsqlConnection(this.connectionString))
             {
-                string consultarSolicitacoesDb = @"select id, descricao,id_usuario,id_status_solicitacao, data_solicitacao from solicitacao where id_status_solicitacao = 1";
+                string consultarSolicitacoesDb = @"select id, descricao,id_usuario,id_status_solicitacao, data_solicitacao 
+                                                from solicitacao as s
+                                                where id_status_solicitacao = 1
+                                                and exists(select 1
+	                                                    from consulta
+	                                                    where id_solicitacao = s.id
+	                                                    and atualizando_status='0'
+	                                                    and id_status_processo < 3);";
+
                 NpgsqlCommand cmd = new NpgsqlCommand(consultarSolicitacoesDb, conexao);
                 conexao.Open();
                 NpgsqlDataReader dr = cmd.ExecuteReader();
@@ -790,6 +787,19 @@ namespace RestServer.Models
                 conexao.Open();
 
                 cmdExtrato.ExecuteNonQuery();
+            }
+        }
+
+        public void LiberarAtualizandoStatus(int idSolicitacao)
+        {
+            using (NpgsqlConnection conexao = new NpgsqlConnection(this.connectionString))
+            {
+                string sql = "update consulta set atualizando_status = '0' where id_solicitacao= @id_solicitacao";
+                NpgsqlCommand cmd = new NpgsqlCommand(sql, conexao);
+
+                cmd.Parameters.AddWithValue("@id_solicitacao", idSolicitacao);
+                conexao.Open();
+                cmd.ExecuteNonQuery();
             }
         }
     }

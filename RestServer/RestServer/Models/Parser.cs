@@ -173,7 +173,10 @@ namespace RestServer.Models
             var retorno = new Dictionary<string, string>();
             foreach (var item in respostaConsulta)
             {
+                //if (!retorno.ContainsKey(item.parametros))
+                //{
                 retorno.Add(LimparTextoResultado(item.parametros), item.result1);
+                //}
             }
 
             return retorno;
@@ -326,28 +329,14 @@ namespace RestServer.Models
             }
             else
             {
-                //extrato.Banco = null;
-                //extrato.CodigoAgencia = String.Empty;
-                //extrato.CompetenciaFinal = null;
-                //extrato.CompetenciaInicial = null;
-                //extrato.ContaCorrente = String.Empty;
-                //extrato.Matricula = String.Empty;
-                //extrato.MesCompetencia = null;
-                //extrato.Nascimento = null;
-                //extrato.Nome = String.Empty;
-                //extrato.Rubricas = null;
-                //extrato.Salario = 0;
-                //extrato.Situacao = String.Empty;
-                //extrato.ValidadeFinal = null;
-                //extrato.ValidadeInicial = null;
-                //extrato.ValorLiquidoCredito = 0;
                 return null;
             }
         }
 
         public static string CriarArquivoCSVDisco(int idSolicitacao, string nomeArquivo)
         {
-            string ArquivoDownload = Path.Combine(@"e:\home\agilus\Temp\", nomeArquivo);
+            string ArquivoDownload = Path.Combine(@"C:\Agilus\Temp", nomeArquivo);
+                //Path.Combine(@"e:\home\agilus\Temp\", nomeArquivo);
 
             //Se o arquivo não existir, ele é criado
             if (!System.IO.File.Exists(ArquivoDownload))
@@ -388,9 +377,20 @@ namespace RestServer.Models
             extrato.Bairro = LoteResultado.Substring(LoteResultado.IndexOf("Bairro   :") + 10, 27).Trim();
             extrato.Tel = LoteResultado.Substring(LoteResultado.IndexOf("Tel.:") + 5, 14).Trim();
             string[] dddRamal = LoteResultado.Substring(LoteResultado.IndexOf("DDD/Ramal:") + 10, 14).Split('/');
-            extrato.Ddd = dddRamal[0].Trim();
-            extrato.Ramal = dddRamal[1].Trim();
-            extrato.Email = LoteResultado.Substring(LoteResultado.IndexOf("E-mail   :") + 10, 62).Trim();
+
+            try
+            {
+                extrato.Ddd = dddRamal[0].Trim();
+                extrato.Ramal = dddRamal[1].Trim();
+                extrato.Email = LoteResultado.Substring(LoteResultado.IndexOf("E-mail   :") + 10, 62).Trim();
+            }
+            
+            catch(Exception)
+            {
+                extrato.Ddd = null;
+                extrato.Ramal = null;
+                extrato.Email = null;
+            }
             return extrato;
         }
 
@@ -482,7 +482,6 @@ namespace RestServer.Models
 
         public string GerarCsvResultado(NpgsqlDataReader ResultadosSolicitacao)
         {
-            //string caminho = Path.GetTempFileName();
             string caminho = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
             StreamWriter ArquivoTemp = new StreamWriter(caminho, true);
             ArquivoTemp.WriteLine(new String(' ', 2000));
@@ -562,7 +561,6 @@ namespace RestServer.Models
 
         public string GeraXmlResultado(NpgsqlDataReader ResultadosSolicitacao)
         {
-            //string caminho = Path.GetTempFileName();
             string caminho = @"e:\home\agilus\Temp\" + Path.GetRandomFileName().Replace(".", "");
             bool aindaHaDados = true;
             StreamWriter ArquivoTemp = new StreamWriter(caminho, true);

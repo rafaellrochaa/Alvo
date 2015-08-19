@@ -20,8 +20,9 @@ namespace RestServer.Controllers
 
             //Se a solicitação já está com o status Download, significa que os lotes foram coletados, portanto o controller faz apenas 1 refresh.
             ConexaoDb2 db = new ConexaoDb2();
+            var solicitacoes = db.ConsultarSolicitacoesPendentes();
 
-            foreach (var solicitacao in db.ConsultarSolicitacoesPendentes())
+            foreach (var solicitacao in solicitacoes)
             {
                 bool haviamlotesPendentes = false;
 
@@ -32,20 +33,26 @@ namespace RestServer.Controllers
 
                     //lista que contém as consultas não coletadas.
                     List<Consulta> consultasSolicitadas = db.ListarConsultasSolicitacao(solicitacao.Id);
-
-                    foreach (var consulta in consultasSolicitadas)
+                    try
                     {
-                        if (!db.VerificarConsultaProcessada(consulta.Id))
+                        foreach (var consulta in consultasSolicitadas)
                         {
-                            //Se o lote não foi processado e não está sendo coletado, é realizada a consulta no servidor e o status do processo é atualizado no banco de dados
-                            db.AtualizarConsulta(parse.InterpretarJsonPedidoConsulta(Servidor.ConsultarStatusPedido(consulta.Chave)));
-                        }
+                            if (!db.VerificarConsultaProcessada(consulta.Id))
+                            {
+                                //Se o lote não foi processado é realizada a consulta no servidor e o status do processo é atualizado no banco de dados
+                                db.AtualizarConsulta(parse.InterpretarJsonPedidoConsulta(Servidor.ConsultarStatusPedido(consulta.Chave)));
+                            }
 
-                        else
-                        {
-                            //Se a consulta foi processada é necessário fazer a coleta.
-                            db.inserirResultado(parse.InterpretarJsonConsultarBuscaLote(Servidor.buscarPedido(consulta.Chave)), (int)consulta.Id, solicitacao.Id, consulta.Status);
+                            else
+                            {
+                                //Se a consulta foi processada é necessário fazer a coleta.
+                                db.inserirResultado(parse.InterpretarJsonConsultarBuscaLote(Servidor.buscarPedido(consulta.Chave)), (int)consulta.Id, solicitacao.Id, consulta.Status);
+                            }
                         }
+                    }
+                    finally
+                    {
+                        db.LiberarAtualizandoStatus(solicitacao.Id);
                     }
                 }
 
