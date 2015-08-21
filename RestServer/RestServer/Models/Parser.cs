@@ -173,16 +173,11 @@ namespace RestServer.Models
             var retorno = new Dictionary<string, string>();
             foreach (var item in respostaConsulta)
             {
-                //if (!retorno.ContainsKey(item.parametros))
-                //{
                 retorno.Add(LimparTextoResultado(item.parametros), item.result1);
-                //}
             }
 
             return retorno;
         }
-
-
 
         public static bool ContemLetras(string texto)
         {

@@ -20,7 +20,6 @@ namespace RestServer.Models
         public string connectionString = String.Format("Server={0};Port={1};User Id={2};Password={3};Database={4};", serverName, port, userName, password, databaseName);
         public NpgsqlConnection conexao;
 
-
         public int VerificarAcessoUsuario(string usuario, string Senha, string ip)
         {
             int idUsuario;
@@ -351,7 +350,7 @@ namespace RestServer.Models
                         cmd.Parameters[1].Value = item.Key;
 
                         //Avaliar valor, se nulo dentro destes 2 status (0,1) = erro de tentativas, senão valor do resultado.
-                        if (item.Value != null)
+                        if (item.Value != null && (item.Value.Contains("<html><head><title>SIW") || item.Value.Contains("RV2") || item.Value.Contains("CONBAS") || item.Value.Contains("TITULAr")))
                         {
                             cmd.Parameters[2].Value = Parser.CompactarResultado(item.Value);
                             tamanhoResultado = item.Value.Length;
